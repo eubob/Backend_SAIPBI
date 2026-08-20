@@ -3,8 +3,7 @@ const app = express();
 const cors = require('cors');
 const config = require("./config/app");
 const { sequelize } = require("./models");
-
-const authRoutes = require("./routes/login"); 
+const routes = require("./routes"); 
 
 async function startServer() {
     try {
@@ -13,7 +12,7 @@ async function startServer() {
         app.use(cors(config.cors));
         app.use(express.json());
 
-        app.use('/', authRoutes);
+        app.use('/', routes);
 
         app.listen(config.port, () => {
             console.log(`Servidor rodando na porta ${config.port}`);
