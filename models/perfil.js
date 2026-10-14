@@ -9,26 +9,27 @@ module.exports = (sequelize) => {
   }
 
   Perfil.init({
-    id: { 
-      type: DataTypes.INTEGER, 
-      primaryKey: true, 
-      autoIncrement: true 
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true
     },
-    nome: { 
-      type: DataTypes.STRING(50), 
-      allowNull: false, 
-      unique: true 
+    // Código estável do perfil: ADMINISTRADOR | GESTOR | OPERADOR (usado no JWT e na autorização)
+    nome: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true
     },
-    descricao: { 
-      type: DataTypes.STRING(255) 
+    descricao: {
+      type: DataTypes.STRING(255)
     }
   }, {
     sequelize,
     modelName: 'Perfil',
-    tableName: 'tb_perfis',
-    underscored: true, 
+    tableName: 'perfil_acesso',
+    underscored: true,
     timestamps: true,
-    paranoid: true  
+    paranoid: true
   });
 
   return Perfil;

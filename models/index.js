@@ -1,43 +1,49 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
+require('dotenv').config();
+const fs = require('node:fs');
+const path = require('node:path');
 const Sequelize = require('sequelize');
+const databaseConfigs = require('../config/database');
+
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require('../config/database')[env];
-const db = {};
+const databaseConfig = databaseConfigs[env] || databaseConfigs.development;
 
-let sequelize;
-if (config.use_env_variable) {
-    sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-    sequelize = new Sequelize(config.database, config.user, config.password, {
-        host: config.host,
-        dialect: config.dialect,
-        port: config.port,
-        timezone: "-03:00",
-        logging: false,
-    });
+const sequelize = new Sequelize(databaseConfig.database, databaseConfig.username, databaseConfig.password, {
+  host: databaseConfig.host,
+  port: databaseConfig.port,
+  dialect: databaseConfig.dialect,
+  logging: databaseConfig.logging,
+  timezone: '+00:00',
+  define: {
+    freezeTableName: true,
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci',
+  },
+  pool: {
+    max: Number(process.env.DB_POOL_MAX) || 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+});
+
+const db = {};
+for (const file of fs.readdirSync(__dirname).filter((name) =>
+  name.endsWith('.js') && name !== basename && !name.startsWith('.')
+)) {
+  const initializeModel = require(path.join(__dirname, file));
+  const model = initializeModel(sequelize, Sequelize.DataTypes);
+  db[model.name] = model;
 }
 
-fs
-    .readdirSync(__dirname)
-    .filter(file => {
-        return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-    })
-    .forEach(file => {
-        const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-        db[model.name] = model;
-    });
-
-Object.keys(db).forEach(modelName => {
-    if (db[modelName].associate) {
-        db[modelName].associate(db);
-    }
-});
+for (const model of Object.values(db)) {
+  if (typeof model.associate === 'function') model.associate(db);
+}
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+db.env = env;
 
 module.exports = db;
