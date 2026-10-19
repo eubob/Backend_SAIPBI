@@ -6,6 +6,7 @@ const userController = require('../controllers/userController');
 const categoriaController = require('../controllers/categoriaController');
 const fornecedorController = require('../controllers/fornecedorController');
 const clienteController = require('../controllers/clienteController');
+const produtoController = require('../controllers/produtoController');
 
 
 const loginRoutes = require('./login');
@@ -49,6 +50,16 @@ routes.get('/clientes/:id', clienteController.buscarClientePorId);
 routes.post('/clientes', clienteController.criarCliente);
 routes.put('/clientes/:id', clienteController.atualizarCliente);
 routes.delete('/clientes/:id', clienteController.deletarCliente);
+
+// ==============================
+// PRODUTOS
+// ==============================
+
+routes.get('/produtos', produtoController.listarProdutos);
+routes.get('/produtos/:id', produtoController.buscarProdutoPorId);
+routes.post('/produtos', produtoController.criarProduto);
+routes.put('/produtos/:id', produtoController.atualizarProduto);
+routes.delete('/produtos/:id', produtoController.deletarProduto);
 
 // ==============================
 // LOGIN
