@@ -7,14 +7,15 @@ const { authMiddleware, authorize } = require("../middlewares/auth");
 const router = express.Router();
 
 router.use(authMiddleware);
+router.use(authorize("ADMINISTRADOR"));
 
-router.get("/", authorize("Administrador"), userController.listarUsuarios);
-router.get("/:id", authorize("Administrador"), userController.buscarUsuarioPorId,);
+router.get("/", userController.listarUsuarios);
+router.get("/:id", userController.buscarUsuarioPorId);
 
-router.post("/", authorize("Administrador"), userController.criarUsuario);
+router.post("/", userController.criarUsuario);
 
-router.put("/:id", authorize("Administrador"), userController.atualizarUsuario);
+router.put("/:id", userController.atualizarUsuario);
 
-router.delete("/:id", authorize("Administrador"), userController.deletarUsuario,);
+router.put("/:id/status", userController.alterarStatusUsuario);
 
 module.exports = router;

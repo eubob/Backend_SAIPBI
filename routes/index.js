@@ -1,16 +1,22 @@
-const { Router } = require('express');
-const routes = Router();
-const userController = require('../controllers/userController');
-const loginRoutes = require('./login'); 
+const express = require("express");
 
+const usuariosRoutes = require("./usuarios.js");
+const perfisRoutes = require("./perfis.js");
+const categoriasRoutes = require("./categorias.js");
+const fornecedoresRoutes = require("./fornecedores.js");
+const clientesRoutes = require("./clientes.js");
+const produtosRoutes = require("./produtos.js");
+const loginRoutes = require("./login.js");
 
-routes.get('/usuarios', userController.listarUsuarios);
-routes.get('/usuarios/:id', userController.buscarUsuarioPorId);
-routes.post('/usuarios', userController.criarUsuario);
-routes.put('/usuarios/:id', userController.atualizarUsuario);
-routes.delete('/usuarios/:id', userController.deletarUsuario);
+const router = express.Router();
 
+router.use("/usuarios", usuariosRoutes);
+router.use("/perfis", perfisRoutes);
+router.use("/categorias", categoriasRoutes);
+router.use("/fornecedores", fornecedoresRoutes);
+router.use("/clientes", clientesRoutes);
+router.use("/produtos", produtosRoutes);
 
-routes.use('/', loginRoutes);
+router.use("/", loginRoutes);
 
-module.exports = routes;
+module.exports = router;
