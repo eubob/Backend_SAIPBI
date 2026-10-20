@@ -14,7 +14,7 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true
     },
-    // Código estável do perfil: ADMINISTRADOR | GESTOR | OPERADOR (usado no JWT e na autorização)
+    // Perfis de acesso do sistema: Administrador | Gestor | Operador (usado no JWT e na autorização)
     nome: {
       type: DataTypes.STRING(50),
       allowNull: false,

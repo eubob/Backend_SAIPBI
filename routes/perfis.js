@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get("/", authorize("ADMINISTRADOR"), perfilController.listarPerfis);
+router.get("/", authorize("Administrador"), perfilController.listarPerfis);
 
 module.exports = router;

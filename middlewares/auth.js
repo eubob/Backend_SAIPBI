@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 
+const PERFIS_VALIDOS = ["Administrador", "Gestor", "Operador"];
+
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -20,9 +22,17 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    const perfil = String(decoded.perfil || "").trim();
+
+    if (!PERFIS_VALIDOS.includes(perfil)) {
+      return res.status(403).json({
+        mensagem: "Perfil de acesso inválido.",
+      });
+    }
+
     req.usuario = {
       id: decoded.id,
-      perfil: decoded.perfil,
+      perfil,
     };
 
     req.userId = decoded.id;
