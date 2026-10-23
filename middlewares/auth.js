@@ -1,69 +1,64 @@
 const jwt = require("jsonwebtoken");
+const { Usuario, Perfil, Empresa } = require("../models");
+const authConfig = require("../config/auth");
 
-const PERFIS_VALIDOS = ["Administrador", "Gestor", "Operador"];
-
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({
-      mensagem: "Token não fornecido. Faça login.",
-    });
-  }
-
-  const [tipo, token] = authHeader.split(" ");
-
-  if (tipo !== "Bearer" || !token) {
-    return res.status(401).json({
-      mensagem: "Formato do token inválido.",
-    });
-  }
-
+module.exports = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const authHeader = req.headers.authorization;
 
-    const perfil = String(decoded.perfil || "").trim();
-
-    if (!PERFIS_VALIDOS.includes(perfil)) {
-      return res.status(403).json({
-        mensagem: "Perfil de acesso inválido.",
-      });
+    if (!authHeader) {
+      return res
+        .status(401)
+        .json({ mensagem: "Token não fornecido. Faça login." });
     }
 
-    req.usuario = {
-      id: decoded.id,
-      perfil,
-    };
+    const [scheme, token] = authHeader.split(" ");
+    if (scheme !== "Bearer" || !token) {
+      return res.status(401).json({ mensagem: "Formato de token inválido." });
+    }
 
-    req.userId = decoded.id;
+    const decoded = jwt.verify(token, authConfig.jwt.secret);
+    const usuario = await Usuario.findOne({
+      where: { id: decoded.id, ativo: true },
+      include: [
+        { model: Perfil, as: "perfil", attributes: ["id", "nome"] },
+        {
+          model: Empresa,
+          as: "empresa",
+          attributes: ["id", "razao_social", "nome_fantasia", "ativo"],
+        },
+      ],
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ mensagem: "Usuário inválido ou inativo." });
+    }
+
+    if (!usuario.empresa || !usuario.empresa.ativo) {
+      return res
+        .status(403)
+        .json({ mensagem: "Empresa inativa ou não encontrada." });
+    }
+
+    req.auth = {
+      usuarioId: usuario.id,
+      empresaId: usuario.empresa_id,
+      perfilId: usuario.perfil_id,
+      perfil: usuario.perfil.nome,
+    };
 
     return next();
   } catch (error) {
-    return res.status(401).json({
-      mensagem: "Token inválido ou expirado.",
-    });
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({ mensagem: "Token inválido ou expirado." });
+    }
+
+    console.error("Erro no middleware de autenticação:", error);
+    return res
+      .status(500)
+      .json({ mensagem: "Erro interno ao validar autenticação." });
   }
-};
-
-const authorize = (...perfisPermitidos) => {
-  return (req, res, next) => {
-    if (!req.usuario) {
-      return res.status(401).json({
-        mensagem: "Usuário não autenticado.",
-      });
-    }
-
-    if (!perfisPermitidos.includes(req.usuario.perfil)) {
-      return res.status(403).json({
-        mensagem: "Você não possui permissão para realizar esta operação.",
-      });
-    }
-
-    return next();
-  };
-};
-
-module.exports = {
-  authMiddleware,
-  authorize,
 };

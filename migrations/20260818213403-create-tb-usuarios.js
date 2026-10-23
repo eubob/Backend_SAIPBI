@@ -4,11 +4,13 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('tb_usuarios', {
-      id: {
+      id: { type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true, allowNull: false },
+      empresa_id: {
         type: Sequelize.INTEGER.UNSIGNED,
-        autoIncrement: true,
-        primaryKey: true,
         allowNull: false,
+        references: { model: 'empresa', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT',
       },
       perfil_id: {
         type: Sequelize.INTEGER.UNSIGNED,
@@ -17,44 +19,20 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT',
       },
-      nome: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      email: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      senha: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
-      },
-      ativo: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      created_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
-      updated_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
-      },
-      deleted_at: {
-        allowNull: true,
-        type: Sequelize.DATE,
-        defaultValue: null,
-      },
+      nome: { type: Sequelize.STRING(100), allowNull: false },
+      email: { type: Sequelize.STRING(100), allowNull: false, unique: true },
+      senha: { type: Sequelize.STRING(255), allowNull: false },
+      ativo: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
+      created_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+      updated_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP') },
+      deleted_at: { allowNull: true, type: Sequelize.DATE, defaultValue: null },
     }, {
       engine: 'InnoDB',
       charset: 'utf8mb4',
       collate: 'utf8mb4_unicode_ci',
     });
+
+    await queryInterface.addIndex('tb_usuarios', ['empresa_id'], { name: 'idx_usuario_empresa' });
   },
 
   async down(queryInterface) {

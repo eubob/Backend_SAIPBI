@@ -1,22 +1,18 @@
-const express = require("express");
+const { Router } = require("express");
 
-const usuariosRoutes = require("./usuarios.js");
-const perfisRoutes = require("./perfis.js");
-const categoriasRoutes = require("./categorias.js");
-const fornecedoresRoutes = require("./fornecedores.js");
-const clientesRoutes = require("./clientes.js");
-const produtosRoutes = require("./produtos.js");
-const loginRoutes = require("./login.js");
+const authMiddleware = require("../middlewares/auth");
 
-const router = express.Router();
+const authRoutes = require("./login");
+const userRoutes = require("./user");
+const perfilRoutes = require("./perfil");
+const empresaRoutes = require("./empresa");
 
-router.use("/usuarios", usuariosRoutes);
-router.use("/perfis", perfisRoutes);
-router.use("/categorias", categoriasRoutes);
-router.use("/fornecedores", fornecedoresRoutes);
-router.use("/clientes", clientesRoutes);
-router.use("/produtos", produtosRoutes);
+const routes = Router();
 
-router.use("/", loginRoutes);
+routes.use("/auth", authRoutes);
+routes.use(authMiddleware);
+routes.use("/usuarios", userRoutes);
+routes.use("/perfis", perfilRoutes);
+routes.use("/empresa", empresaRoutes);
 
-module.exports = router;
+module.exports = routes;
