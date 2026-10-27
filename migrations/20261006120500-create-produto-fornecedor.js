@@ -1,36 +1,73 @@
-'use strict';
+"use strict";
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('produto_fornecedor', {
-      id: { type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true, allowNull: false },
-      produto_id: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
-        references: { model: 'produto', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
+    await queryInterface.createTable(
+      "produto_fornecedor",
+      {
+        id: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          autoIncrement: true,
+          primaryKey: true,
+          allowNull: false,
+        },
+        empresa_id: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          allowNull: false,
+          references: { model: "empresa", key: "id" },
+          onUpdate: "CASCADE",
+          onDelete: "RESTRICT",
+        },
+        produto_id: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          allowNull: false,
+          references: { model: "produto", key: "id" },
+          onUpdate: "CASCADE",
+          onDelete: "RESTRICT",
+        },
+        fornecedor_id: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          allowNull: false,
+          references: { model: "fornecedor", key: "id" },
+          onUpdate: "CASCADE",
+          onDelete: "RESTRICT",
+        },
+        prazo_padrao_dias: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          allowNull: false,
+        },
+        lote_minimo: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          allowNull: false,
+          defaultValue: 1,
+        },
+        custo: { type: Sequelize.DECIMAL(12, 2), allowNull: false },
+        principal: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
+        created_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        },
+        updated_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal(
+            "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+          ),
+        },
       },
-      fornecedor_id: {
-        type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
-        references: { model: 'fornecedor', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-      },
-      prazo_padrao_dias: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false },
-      lote_minimo: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false, defaultValue: 1 },
-      custo: { type: Sequelize.DECIMAL(12, 2), allowNull: false },
-      principal: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
-      created_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
-      updated_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP') },
-    }, { engine: 'InnoDB', charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci' });
+      { engine: "InnoDB", charset: "utf8mb4", collate: "utf8mb4_unicode_ci" },
+    );
 
     // Um fornecedor só pode aparecer uma vez por produto.
-    await queryInterface.addConstraint('produto_fornecedor', {
-      fields: ['produto_id', 'fornecedor_id'],
-      type: 'unique',
-      name: 'uq_produto_fornecedor',
+    await queryInterface.addConstraint("produto_fornecedor", {
+      fields: ["empresa_id", "produto_id", "fornecedor_id"],
+      type: "unique",
+      name: "uq_produto_fornecedor",
     });
 
     await queryInterface.sequelize.query(`
@@ -51,9 +88,12 @@ module.exports = {
     `);
     // O índice em produto_id é coberto pelo UNIQUE (produto_id, fornecedor_id);
     // o índice em fornecedor_id é criado automaticamente pela FK.
+    await queryInterface.addIndex("produto_fornecedor", ["empresa_id"], {
+      name: "idx_produto_fornecedor_empresa",
+    });
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('produto_fornecedor');
+    await queryInterface.dropTable("produto_fornecedor");
   },
 };

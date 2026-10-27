@@ -1,20 +1,22 @@
 const express = require("express");
-
-const fornecedorController = require("../controllers/fornecedorController");
-
-const { authMiddleware, authorize } = require("../middlewares/auth");
-
+const controller = require("../controllers/fornecedorController");
+const authorize = require("../middlewares/authorize");
 const router = express.Router();
-
-router.use(authMiddleware);
-
-router.get("/", fornecedorController.listarFornecedores);
-router.get("/:id", fornecedorController.buscarFornecedorPorId);
-
-router.post("/", authorize("Administrador", "Gestor"), fornecedorController.criarFornecedor,);
-
-router.put( "/:id", authorize("Administrador", "Gestor"), fornecedorController.atualizarFornecedor,);
-
-router.delete("/:id", authorize("Administrador", "Gestor"), fornecedorController.deletarFornecedor,);
-
+router.get("/", controller.listarFornecedors);
+router.get("/:id", controller.buscarFornecedorPorId);
+router.post(
+  "/",
+  authorize("Administrador", "Gestor"),
+  controller.criarFornecedor,
+);
+router.put(
+  "/:id",
+  authorize("Administrador", "Gestor"),
+  controller.atualizarFornecedor,
+);
+router.delete(
+  "/:id",
+  authorize("Administrador", "Gestor"),
+  controller.deletarFornecedor,
+);
 module.exports = router;

@@ -6,6 +6,10 @@ const authRoutes = require("./login");
 const userRoutes = require("./user");
 const perfilRoutes = require("./perfil");
 const empresaRoutes = require("./empresa");
+const categoriaRoutes = require("./categorias");
+const clienteRoutes = require("./clientes");
+const fornecedorRoutes = require("./fornecedores");
+const produtoRoutes = require("./produtos");
 
 const routes = Router();
 
@@ -14,5 +18,9 @@ routes.use(authMiddleware);
 routes.use("/usuarios", userRoutes);
 routes.use("/perfis", perfilRoutes);
 routes.use("/empresa", empresaRoutes);
+routes.use("/categorias", categoriaRoutes);
+routes.use("/clientes", clienteRoutes);
+routes.use("/fornecedores", fornecedorRoutes);
+routes.use("/produtos", produtoRoutes);
 
 module.exports = routes;
