@@ -1,6 +1,6 @@
 const { Categoria } = require("../models");
 
-exports.listarCategorias = async (req, res) => {
+exports.listarCategorias = async (req, res, next) => {
   try {
     const registros = await Categoria.findAll({
       where: { empresa_id: req.auth.empresaId },
@@ -8,14 +8,11 @@ exports.listarCategorias = async (req, res) => {
     });
     return res.status(200).json(registros);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao listar categorias." });
+    return next(error);
   }
 };
 
-exports.buscarCategoriaPorId = async (req, res) => {
+exports.buscarCategoriaPorId = async (req, res, next) => {
   try {
     const registro = await Categoria.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -24,14 +21,11 @@ exports.buscarCategoriaPorId = async (req, res) => {
       return res.status(404).json({ mensagem: "Categoria não encontrado." });
     return res.status(200).json(registro);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao buscar categoria." });
+    return next(error);
   }
 };
 
-exports.criarCategoria = async (req, res) => {
+exports.criarCategoria = async (req, res, next) => {
   try {
     const dados = {};
     dados.nome =
@@ -46,31 +40,24 @@ exports.criarCategoria = async (req, res) => {
         where: { empresa_id: req.auth.empresaId, nome: dados.nome },
       });
       if (existe)
-        return res
-          .status(409)
-          .json({
-            mensagem: "Já existe registro com esse nome nesta empresa.",
-          });
+        return res.status(409).json({
+          mensagem: "Já existe registro com esse nome nesta empresa.",
+        });
     }
     const registro = await Categoria.create({
       ...dados,
       empresa_id: req.auth.empresaId,
     });
-    return res
-      .status(201)
-      .json({
-        mensagem: "Categoria cadastrado com sucesso.",
-        categoria: registro,
-      });
+    return res.status(201).json({
+      mensagem: "Categoria cadastrado com sucesso.",
+      categoria: registro,
+    });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao criar categoria." });
+    return next(error);
   }
 };
 
-exports.atualizarCategoria = async (req, res) => {
+exports.atualizarCategoria = async (req, res, next) => {
   try {
     const registro = await Categoria.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -86,28 +73,21 @@ exports.atualizarCategoria = async (req, res) => {
         where: { empresa_id: req.auth.empresaId, nome: registro.nome },
       });
       if (existe && existe.id !== registro.id)
-        return res
-          .status(409)
-          .json({
-            mensagem: "Já existe registro com esse nome nesta empresa.",
-          });
+        return res.status(409).json({
+          mensagem: "Já existe registro com esse nome nesta empresa.",
+        });
     }
     await registro.save();
-    return res
-      .status(200)
-      .json({
-        mensagem: "Categoria atualizado com sucesso.",
-        categoria: registro,
-      });
+    return res.status(200).json({
+      mensagem: "Categoria atualizado com sucesso.",
+      categoria: registro,
+    });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao atualizar categoria." });
+    return next(error);
   }
 };
 
-exports.deletarCategoria = async (req, res) => {
+exports.deletarCategoria = async (req, res, next) => {
   try {
     const registro = await Categoria.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -116,16 +96,11 @@ exports.deletarCategoria = async (req, res) => {
       return res.status(404).json({ mensagem: "Categoria não encontrado." });
     registro.ativo = false;
     await registro.save();
-    return res
-      .status(200)
-      .json({
-        mensagem: "Categoria inativado com sucesso.",
-        categoria: registro,
-      });
+    return res.status(200).json({
+      mensagem: "Categoria inativado com sucesso.",
+      categoria: registro,
+    });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao inativar categoria." });
+    return next(error);
   }
 };

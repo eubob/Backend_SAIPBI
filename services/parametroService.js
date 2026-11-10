@@ -1,15 +1,27 @@
 "use strict";
 
+const AppError = require("../utils/AppError");
 const { ParametroSistema } = require("../models");
 const { PARAMETROS_PADRAO } = require("../config/parametros");
 
 function converterValor(valor, tipo) {
+  if (
+    valor === null ||
+    valor === undefined ||
+    !["string", "number", "boolean"].includes(typeof valor)
+  ) {
+    throw new AppError(400, "Valor de parâmetro inválido.");
+  }
   switch (tipo) {
     case "INTEIRO": {
       const convertido = Number(valor);
 
-      if (!Number.isInteger(convertido)) {
-        throw new Error("O valor deve ser um número inteiro.");
+      if (
+        typeof valor === "boolean" ||
+        String(valor).trim() === "" ||
+        !Number.isSafeInteger(convertido)
+      ) {
+        throw new AppError(400, "O valor deve ser um número inteiro.");
       }
 
       return convertido;
@@ -18,8 +30,12 @@ function converterValor(valor, tipo) {
     case "DECIMAL": {
       const convertido = Number(valor);
 
-      if (!Number.isFinite(convertido)) {
-        throw new Error("O valor deve ser um número decimal válido.");
+      if (
+        typeof valor === "boolean" ||
+        String(valor).trim() === "" ||
+        !Number.isFinite(convertido)
+      ) {
+        throw new AppError(400, "O valor deve ser um número decimal válido.");
       }
 
       return convertido;
@@ -39,14 +55,14 @@ function converterValor(valor, tipo) {
         return false;
       }
 
-      throw new Error("O valor deve ser verdadeiro ou falso.");
+      throw new AppError(400, "O valor deve ser verdadeiro ou falso.");
     }
 
     case "HORA": {
       const texto = String(valor).trim();
 
       if (!/^([01]\d|2[0-3]):([0-5]\d)$/.test(texto)) {
-        throw new Error("O valor deve estar no formato HH:mm.");
+        throw new AppError(400, "O valor deve estar no formato HH:mm.");
       }
 
       return texto;
@@ -56,7 +72,7 @@ function converterValor(valor, tipo) {
       return String(valor);
 
     default:
-      throw new Error(`Tipo de parâmetro inválido: ${tipo}.`);
+      throw new AppError(400, "Tipo de parâmetro inválido.");
   }
 }
 
@@ -114,9 +130,7 @@ async function atualizar(empresaId, chave, valor) {
   const parametro = await buscarPorChave(empresaId, chave);
 
   if (!parametro) {
-    const erro = new Error("Parâmetro não encontrado.");
-    erro.status = 404;
-    throw erro;
+    throw new AppError(404, "Parâmetro não encontrado.");
   }
 
   parametro.valor = serializarValor(valor, parametro.tipo);
@@ -128,18 +142,14 @@ async function atualizar(empresaId, chave, valor) {
 
 async function atualizarVarios(empresaId, parametros) {
   if (!Array.isArray(parametros) || parametros.length === 0) {
-    const erro = new Error("Informe ao menos um parâmetro para atualização.");
-    erro.status = 400;
-    throw erro;
+    throw new AppError(400, "Informe ao menos um parâmetro para atualização.");
   }
 
   const resultados = [];
 
   for (const item of parametros) {
-    if (!item.chave || item.valor === undefined) {
-      const erro = new Error("Cada parâmetro deve possuir chave e valor.");
-      erro.status = 400;
-      throw erro;
+    if (!item || !item.chave || item.valor === undefined) {
+      throw new AppError(400, "Cada parâmetro deve possuir chave e valor.");
     }
 
     const atualizado = await atualizar(empresaId, item.chave, item.valor);

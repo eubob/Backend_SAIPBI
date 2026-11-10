@@ -1,0 +1,309 @@
+// Schema observado em 2026-11-07; origem: information_schema do banco local.
+// Colunas geradas e CHECKs são preservados como notas; não executar como migration.
+
+Table categoria {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  nome "varchar(100)" [not null]
+  ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  indexes {
+    (empresa_id) [name: 'idx_categoria_empresa']
+    (empresa_id, nome) [name: 'uq_categoria_empresa_nome', unique]
+  }
+}
+
+Table cliente {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  nome "varchar(150)" [not null]
+  documento "varchar(20)" [note: 'DEFAULT NULL']
+  contato "varchar(150)" [note: 'DEFAULT NULL']
+  ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  indexes {
+    (empresa_id) [name: 'idx_cliente_empresa']
+    (empresa_id, documento) [name: 'uq_cliente_empresa_documento', unique]
+  }
+}
+
+Table compra {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  fornecedor_id "int(10) unsigned" [not null]
+  data_pedido "date" [not null]
+  data_prevista "date" [not null]
+  status "enum('PEDIDA','RECEBIDA','CANCELADA')" [not null, note: 'DEFAULT \'PEDIDA\'']
+  observacao "varchar(500)" [note: 'DEFAULT NULL']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_compra_data_prevista: `data_prevista` >= `data_pedido`'
+  indexes {
+    (fornecedor_id) [name: 'fornecedor_id']
+    (data_pedido) [name: 'idx_compra_data_pedido']
+    (empresa_id) [name: 'idx_compra_empresa']
+    (status, data_prevista) [name: 'idx_compra_status_prevista']
+  }
+}
+
+Table empresa {
+  id "int(10) unsigned" [pk, not null, increment]
+  razao_social "varchar(150)" [not null]
+  nome_fantasia "varchar(150)" [not null]
+  documento "varchar(20)" [note: 'DEFAULT NULL']
+  email "varchar(120)" [note: 'DEFAULT NULL']
+  telefone "varchar(20)" [note: 'DEFAULT NULL']
+  ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  deleted_at "datetime" [note: 'DEFAULT NULL']
+  indexes {
+    (documento) [name: 'documento', unique]
+  }
+}
+
+Table entrada {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  compra_id "int(10) unsigned" [not null]
+  data_recebimento "date" [not null]
+  observacao "varchar(500)" [note: 'DEFAULT NULL']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  indexes {
+    (compra_id) [name: 'compra_id']
+    (data_recebimento) [name: 'idx_entrada_data_recebimento']
+    (empresa_id) [name: 'idx_entrada_empresa']
+  }
+}
+
+Table fornecedor {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  razao_social "varchar(150)" [not null]
+  documento "varchar(20)" [not null]
+  contato "varchar(150)" [note: 'DEFAULT NULL']
+  ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  indexes {
+    (empresa_id) [name: 'idx_fornecedor_empresa']
+    (empresa_id, documento) [name: 'uq_fornecedor_empresa_documento', unique]
+  }
+}
+
+Table item_compra {
+  id "int(10) unsigned" [pk, not null, increment]
+  compra_id "int(10) unsigned" [not null]
+  produto_id "int(10) unsigned" [not null]
+  quantidade "int(10) unsigned" [not null]
+  custo_unitario "decimal(12,2)" [not null]
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_item_compra_custo: `custo_unitario` > 0\nck_item_compra_quantidade: `quantidade` > 0'
+  indexes {
+    (produto_id) [name: 'produto_id']
+    (compra_id, produto_id) [name: 'uq_item_compra_compra_produto', unique]
+    (id, produto_id) [name: 'uq_item_compra_id_produto', unique]
+  }
+}
+
+Table item_entrada {
+  id "int(10) unsigned" [pk, not null, increment]
+  entrada_id "int(10) unsigned" [not null]
+  item_compra_id "int(10) unsigned" [not null]
+  produto_id "int(10) unsigned" [not null]
+  quantidade_recebida "int(10) unsigned" [not null]
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_item_entrada_quantidade: `quantidade_recebida` > 0'
+  indexes {
+    (item_compra_id, produto_id) [name: 'fk_item_entrada_item_compra']
+    (produto_id) [name: 'produto_id']
+    (entrada_id, item_compra_id) [name: 'uq_item_entrada_entrada_item_compra', unique]
+  }
+}
+
+Table item_saida {
+  id "int(10) unsigned" [pk, not null, increment]
+  saida_id "int(10) unsigned" [not null]
+  produto_id "int(10) unsigned" [not null]
+  quantidade "int(10) unsigned" [not null]
+  preco_unitario "decimal(12,2)" [not null]
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_item_saida_preco: `preco_unitario` > 0\nck_item_saida_quantidade: `quantidade` > 0'
+  indexes {
+    (produto_id) [name: 'produto_id']
+    (saida_id, produto_id) [name: 'uq_item_saida_saida_produto', unique]
+  }
+}
+
+Table movimentacao_estoque {
+  id "bigint(20) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  produto_id "int(10) unsigned" [not null]
+  tipo "enum('INVENTARIO_INICIAL','ENTRADA_COMPRA','SAIDA_VENDA','ESTORNO_VENDA','AJUSTE')" [not null]
+  quantidade "int(11)" [not null]
+  saldo_apos "int(11)" [not null]
+  data_hora "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  item_entrada_id "int(10) unsigned" [note: 'DEFAULT NULL']
+  item_saida_id "int(10) unsigned" [note: 'DEFAULT NULL']
+  motivo "varchar(255)" [note: 'DEFAULT NULL']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_mov_ajuste_exige_motivo: `tipo` <> \'AJUSTE\' or `motivo` is not null and char_length(trim(`motivo`)) > 0\nck_mov_origem_por_tipo: `tipo` = \'ENTRADA_COMPRA\' and `item_entrada_id` is not null and `item_saida_id` is null or `tipo` in (\'SAIDA_VENDA\',\'ESTORNO_VENDA\') and `item_saida_id` is not null and `item_entrada_id` is null or `tipo` in (\'INVENTARIO_INICIAL\',\'AJUSTE\') and `item_entrada_id` is null and `item_saida_id` is null\nck_mov_quantidade_nao_zero: `quantidade` <> 0\nck_mov_sinal_por_tipo: `tipo` in (\'INVENTARIO_INICIAL\',\'ENTRADA_COMPRA\',\'ESTORNO_VENDA\') and `quantidade` > 0 or `tipo` = \'SAIDA_VENDA\' and `quantidade` < 0 or `tipo` = \'AJUSTE\''
+  indexes {
+    (empresa_id) [name: 'idx_movimentacao_estoque_empresa']
+    (produto_id, data_hora) [name: 'idx_mov_produto_data']
+    (item_entrada_id) [name: 'uq_mov_item_entrada', unique]
+    (item_saida_id, tipo) [name: 'uq_mov_item_saida_tipo', unique]
+  }
+}
+
+Table parametro_sistema {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  chave "varchar(100)" [not null]
+  valor "varchar(255)" [not null]
+  tipo "enum('INTEIRO','DECIMAL','TEXTO','BOOLEANO','HORA')" [not null]
+  grupo "varchar(50)" [not null]
+  descricao "varchar(255)" [note: 'DEFAULT NULL']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  indexes {
+    (grupo) [name: 'idx_parametro_grupo']
+    (empresa_id) [name: 'idx_parametro_sistema_empresa']
+    (empresa_id, chave) [name: 'uq_parametro_empresa_chave', unique]
+  }
+}
+
+Table perfil_acesso {
+  id "int(10) unsigned" [pk, not null, increment]
+  nome "varchar(50)" [not null]
+  descricao "varchar(255)" [note: 'DEFAULT NULL']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  deleted_at "datetime" [note: 'DEFAULT NULL']
+  indexes {
+    (nome) [name: 'nome', unique]
+  }
+}
+
+Table produto {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  categoria_id "int(10) unsigned" [not null]
+  nome "varchar(150)" [not null]
+  sku "varchar(50)" [not null]
+  unidade "varchar(10)" [not null, note: 'DEFAULT \'un\'']
+  preco_venda "decimal(12,2)" [not null]
+  custo "decimal(12,2)" [not null]
+  estoque_minimo "int(11)" [not null, note: 'DEFAULT 0']
+  estoque_atual "int(11)" [not null, note: 'DEFAULT 0']
+  ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_produto_custo_positivo: `custo` > 0\nck_produto_estoque_minimo: `estoque_minimo` >= 0\nck_produto_preco_venda_positivo: `preco_venda` > 0'
+  indexes {
+    (categoria_id) [name: 'categoria_id']
+    (empresa_id) [name: 'idx_produto_empresa']
+    (empresa_id, sku) [name: 'uq_produto_empresa_sku', unique]
+  }
+}
+
+Table produto_fornecedor {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  produto_id "int(10) unsigned" [not null]
+  fornecedor_id "int(10) unsigned" [not null]
+  prazo_padrao_dias "int(10) unsigned" [not null]
+  lote_minimo "int(10) unsigned" [not null, note: 'DEFAULT 1']
+  custo "decimal(12,2)" [not null]
+  principal "tinyint(1)" [not null, note: 'DEFAULT 0']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  produto_principal_id "int(10) unsigned" [note: 'DEFAULT NULL; GENERATED case when `principal` = 1 then `produto_id` else NULL end (VIRTUAL GENERATED)']
+  Note: 'ck_pf_custo_positivo: `custo` > 0\nck_pf_lote_positivo: `lote_minimo` > 0\nck_pf_prazo_positivo: `prazo_padrao_dias` > 0'
+  indexes {
+    (fornecedor_id) [name: 'fornecedor_id']
+    (empresa_id) [name: 'idx_produto_fornecedor_empresa']
+    (produto_id) [name: 'produto_id']
+    (produto_principal_id) [name: 'uq_pf_um_principal_por_produto', unique]
+    (empresa_id, produto_id, fornecedor_id) [name: 'uq_produto_fornecedor', unique]
+  }
+}
+
+Table saida {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  cliente_id "int(10) unsigned" [note: 'DEFAULT NULL']
+  tipo "enum('VENDA')" [not null, note: 'DEFAULT \'VENDA\'']
+  data_hora "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  status "enum('REGISTRADA','CANCELADA')" [not null, note: 'DEFAULT \'REGISTRADA\'']
+  cancelada_em "datetime" [note: 'DEFAULT NULL']
+  observacao "varchar(500)" [note: 'DEFAULT NULL']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  Note: 'ck_saida_cancelamento_coerente: `status` = \'CANCELADA\' and `cancelada_em` is not null or `status` = \'REGISTRADA\' and `cancelada_em` is null'
+  indexes {
+    (cliente_id) [name: 'cliente_id']
+    (empresa_id) [name: 'idx_saida_empresa']
+    (status, data_hora) [name: 'idx_saida_status_data']
+  }
+}
+
+Table sequelizemeta {
+  name "varchar(255)" [pk, not null]
+  indexes {
+    (name) [name: 'name', unique]
+  }
+}
+
+Table usuario {
+  id "int(10) unsigned" [pk, not null, increment]
+  empresa_id "int(10) unsigned" [not null]
+  perfil_id "int(10) unsigned" [not null]
+  nome "varchar(100)" [not null]
+  email "varchar(100)" [not null]
+  senha "varchar(255)" [not null]
+  ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
+  deleted_at "datetime" [note: 'DEFAULT NULL']
+  indexes {
+    (email) [name: 'email', unique]
+    (empresa_id) [name: 'idx_usuario_empresa']
+    (perfil_id) [name: 'perfil_id']
+  }
+}
+
+Ref: categoria.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: cliente.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: compra.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: compra.fornecedor_id > fornecedor.id [delete: restrict, update: cascade]
+Ref: entrada.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: entrada.compra_id > compra.id [delete: restrict, update: cascade]
+Ref: fornecedor.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: item_compra.compra_id > compra.id [delete: restrict, update: cascade]
+Ref: item_compra.produto_id > produto.id [delete: restrict, update: cascade]
+Ref: item_entrada.(item_compra_id, produto_id) > item_compra.(id, produto_id) [delete: restrict, update: cascade]
+Ref: item_entrada.entrada_id > entrada.id [delete: restrict, update: cascade]
+Ref: item_entrada.produto_id > produto.id [delete: restrict, update: cascade]
+Ref: item_saida.saida_id > saida.id [delete: restrict, update: cascade]
+Ref: item_saida.produto_id > produto.id [delete: restrict, update: cascade]
+Ref: movimentacao_estoque.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: movimentacao_estoque.produto_id > produto.id [delete: restrict, update: cascade]
+Ref: movimentacao_estoque.item_entrada_id > item_entrada.id [delete: restrict, update: restrict]
+Ref: movimentacao_estoque.item_saida_id > item_saida.id [delete: restrict, update: restrict]
+Ref: parametro_sistema.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: produto.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: produto.categoria_id > categoria.id [delete: restrict, update: cascade]
+Ref: produto_fornecedor.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: produto_fornecedor.produto_id > produto.id [delete: restrict, update: cascade]
+Ref: produto_fornecedor.fornecedor_id > fornecedor.id [delete: restrict, update: cascade]
+Ref: saida.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: saida.cliente_id > cliente.id [delete: restrict, update: cascade]
+Ref: usuario.empresa_id > empresa.id [delete: restrict, update: cascade]
+Ref: usuario.perfil_id > perfil_acesso.id [delete: restrict, update: cascade]

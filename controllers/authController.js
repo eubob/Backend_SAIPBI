@@ -4,7 +4,7 @@ const { Usuario, Perfil, Empresa } = require("../models");
 const authConfig = require("../config/auth");
 
 module.exports = {
-  async login(req, res) {
+  async login(req, res, next) {
     try {
       const { email, senha } = req.body;
       if (!email || !senha)
@@ -62,14 +62,11 @@ module.exports = {
         token,
       });
     } catch (error) {
-      console.error("Erro no login:", error);
-      return res
-        .status(500)
-        .json({ mensagem: "Erro interno ao realizar login." });
+      return next(error);
     }
   },
 
-  async me(req, res) {
+  async me(req, res, next) {
     try {
       const usuario = await Usuario.findOne({
         where: {
@@ -109,10 +106,7 @@ module.exports = {
         empresa: usuario.empresa,
       });
     } catch (error) {
-      console.error("Erro ao carregar sessão:", error);
-      return res
-        .status(500)
-        .json({ mensagem: "Erro ao carregar dados da sessão." });
+      return next(error);
     }
   },
 };

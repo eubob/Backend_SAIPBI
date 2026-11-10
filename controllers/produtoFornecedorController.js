@@ -1,5 +1,5 @@
 const { Produto, Fornecedor, ProdutoFornecedor } = require("../models");
-exports.listarFornecedoresDoProduto = async (req, res) => {
+exports.listarFornecedoresDoProduto = async (req, res, next) => {
   try {
     const produto = await Produto.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -13,11 +13,10 @@ exports.listarFornecedoresDoProduto = async (req, res) => {
     });
     return res.json(vinculos);
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ mensagem: "Erro interno." });
+    return next(e);
   }
 };
-exports.vincularFornecedor = async (req, res) => {
+exports.vincularFornecedor = async (req, res, next) => {
   try {
     const {
       fornecedor_id,
@@ -34,11 +33,9 @@ exports.vincularFornecedor = async (req, res) => {
       where: { id: fornecedor_id, empresa_id, ativo: true },
     });
     if (!produto || !fornecedor)
-      return res
-        .status(404)
-        .json({
-          mensagem: "Produto ou fornecedor não encontrado nesta empresa.",
-        });
+      return res.status(404).json({
+        mensagem: "Produto ou fornecedor não encontrado nesta empresa.",
+      });
     if (
       Number(prazo_padrao_dias) <= 0 ||
       Number(lote_minimo) <= 0 ||
@@ -71,11 +68,10 @@ exports.vincularFornecedor = async (req, res) => {
       .status(201)
       .json({ mensagem: "Fornecedor vinculado com sucesso.", vinculo });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ mensagem: "Erro interno." });
+    return next(e);
   }
 };
-exports.atualizarVinculo = async (req, res) => {
+exports.atualizarVinculo = async (req, res, next) => {
   try {
     const empresa_id = req.auth.empresaId;
     const v = await ProdutoFornecedor.findOne({
@@ -109,11 +105,10 @@ exports.atualizarVinculo = async (req, res) => {
       vinculo: v,
     });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ mensagem: "Erro interno." });
+    return next(e);
   }
 };
-exports.removerVinculo = async (req, res) => {
+exports.removerVinculo = async (req, res, next) => {
   try {
     const v = await ProdutoFornecedor.findOne({
       where: {
@@ -127,7 +122,6 @@ exports.removerVinculo = async (req, res) => {
     await v.destroy();
     return res.json({ mensagem: "Fornecedor desvinculado com sucesso." });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ mensagem: "Erro interno." });
+    return next(e);
   }
 };

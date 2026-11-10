@@ -1,6 +1,6 @@
 const { Perfil } = require("../models");
 
-const listarPerfis = async (req, res) => {
+const listarPerfis = async (req, res, next) => {
   try {
     const perfis = await Perfil.findAll({
       attributes: ["id", "nome", "descricao"],
@@ -10,11 +10,7 @@ const listarPerfis = async (req, res) => {
 
     return res.status(200).json(perfis);
   } catch (error) {
-    console.error("Erro ao buscar perfis:", error);
-
-    return res.status(500).json({
-      mensagem: "Erro ao buscar perfis.",
-    });
+    return next(error);
   }
 };
 

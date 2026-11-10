@@ -12,8 +12,8 @@ module.exports = async (req, res, next) => {
         .json({ mensagem: "Token não fornecido. Faça login." });
     }
 
-    const [scheme, token] = authHeader.split(" ");
-    if (scheme !== "Bearer" || !token) {
+    const [scheme, token, extra] = authHeader.split(" ");
+    if (scheme !== "Bearer" || !token || extra !== undefined) {
       return res.status(401).json({ mensagem: "Formato de token inválido." });
     }
 
@@ -51,14 +51,12 @@ module.exports = async (req, res, next) => {
   } catch (error) {
     if (
       error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
+      error.name === "TokenExpiredError" ||
+      error.name === "NotBeforeError"
     ) {
       return res.status(401).json({ mensagem: "Token inválido ou expirado." });
     }
 
-    console.error("Erro no middleware de autenticação:", error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao validar autenticação." });
+    return next(error);
   }
 };

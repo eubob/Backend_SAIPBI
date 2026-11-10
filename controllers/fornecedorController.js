@@ -1,6 +1,6 @@
 const { Fornecedor } = require("../models");
 
-exports.listarFornecedors = async (req, res) => {
+exports.listarFornecedors = async (req, res, next) => {
   try {
     const registros = await Fornecedor.findAll({
       where: { empresa_id: req.auth.empresaId },
@@ -8,14 +8,11 @@ exports.listarFornecedors = async (req, res) => {
     });
     return res.status(200).json(registros);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao listar fornecedors." });
+    return next(error);
   }
 };
 
-exports.buscarFornecedorPorId = async (req, res) => {
+exports.buscarFornecedorPorId = async (req, res, next) => {
   try {
     const registro = await Fornecedor.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -24,14 +21,11 @@ exports.buscarFornecedorPorId = async (req, res) => {
       return res.status(404).json({ mensagem: "Fornecedor não encontrado." });
     return res.status(200).json(registro);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao buscar fornecedor." });
+    return next(error);
   }
 };
 
-exports.criarFornecedor = async (req, res) => {
+exports.criarFornecedor = async (req, res, next) => {
   try {
     const dados = {};
     dados.razao_social =
@@ -69,14 +63,11 @@ exports.criarFornecedor = async (req, res) => {
       fornecedor: registro,
     });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao criar fornecedor." });
+    return next(error);
   }
 };
 
-exports.atualizarFornecedor = async (req, res) => {
+exports.atualizarFornecedor = async (req, res, next) => {
   try {
     const registro = await Fornecedor.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -117,14 +108,11 @@ exports.atualizarFornecedor = async (req, res) => {
       fornecedor: registro,
     });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao atualizar fornecedor." });
+    return next(error);
   }
 };
 
-exports.deletarFornecedor = async (req, res) => {
+exports.deletarFornecedor = async (req, res, next) => {
   try {
     const registro = await Fornecedor.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -138,9 +126,6 @@ exports.deletarFornecedor = async (req, res) => {
       fornecedor: registro,
     });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao inativar fornecedor." });
+    return next(error);
   }
 };

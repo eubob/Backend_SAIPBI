@@ -4,25 +4,20 @@ const includeCategoria = [
   { model: Categoria, as: "categoria", attributes: ["id", "nome", "ativo"] },
 ];
 
-exports.listarProdutos = async (req, res) => {
+exports.listarProdutos = async (req, res, next) => {
   try {
-    return res
-      .status(200)
-      .json(
-        await Produto.findAll({
-          where: { empresa_id: req.auth.empresaId },
-          include: includeCategoria,
-          order: [["nome", "ASC"]],
-        }),
-      );
+    return res.status(200).json(
+      await Produto.findAll({
+        where: { empresa_id: req.auth.empresaId },
+        include: includeCategoria,
+        order: [["nome", "ASC"]],
+      }),
+    );
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao listar produtos." });
+    return next(error);
   }
 };
-exports.buscarProdutoPorId = async (req, res) => {
+exports.buscarProdutoPorId = async (req, res, next) => {
   try {
     const produto = await Produto.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -32,13 +27,10 @@ exports.buscarProdutoPorId = async (req, res) => {
       return res.status(404).json({ mensagem: "Produto não encontrado." });
     return res.json(produto);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao buscar produto." });
+    return next(error);
   }
 };
-exports.criarProduto = async (req, res) => {
+exports.criarProduto = async (req, res, next) => {
   try {
     const {
       categoria_id,
@@ -66,11 +58,9 @@ exports.criarProduto = async (req, res) => {
       where: { id: categoria_id, empresa_id: req.auth.empresaId, ativo: true },
     });
     if (!categoria)
-      return res
-        .status(404)
-        .json({
-          mensagem: "Categoria não encontrada nesta empresa ou inativa.",
-        });
+      return res.status(404).json({
+        mensagem: "Categoria não encontrada nesta empresa ou inativa.",
+      });
     if (
       await Produto.findOne({
         where: { empresa_id: req.auth.empresaId, sku: sku.trim() },
@@ -95,11 +85,10 @@ exports.criarProduto = async (req, res) => {
       .status(201)
       .json({ mensagem: "Produto cadastrado com sucesso.", produto });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ mensagem: "Erro interno ao criar produto." });
+    return next(error);
   }
 };
-exports.atualizarProduto = async (req, res) => {
+exports.atualizarProduto = async (req, res, next) => {
   try {
     const produto = await Produto.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -125,11 +114,9 @@ exports.atualizarProduto = async (req, res) => {
         },
       });
       if (!cat)
-        return res
-          .status(404)
-          .json({
-            mensagem: "Categoria não encontrada nesta empresa ou inativa.",
-          });
+        return res.status(404).json({
+          mensagem: "Categoria não encontrada nesta empresa ou inativa.",
+        });
       produto.categoria_id = categoria_id;
     }
     if (sku !== undefined) {
@@ -165,13 +152,10 @@ exports.atualizarProduto = async (req, res) => {
     await produto.save();
     return res.json({ mensagem: "Produto atualizado com sucesso.", produto });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao atualizar produto." });
+    return next(error);
   }
 };
-exports.deletarProduto = async (req, res) => {
+exports.deletarProduto = async (req, res, next) => {
   try {
     const produto = await Produto.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -182,9 +166,6 @@ exports.deletarProduto = async (req, res) => {
     await produto.save();
     return res.json({ mensagem: "Produto inativado com sucesso.", produto });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno ao inativar produto." });
+    return next(error);
   }
 };

@@ -2,7 +2,7 @@
 
 const parametroService = require("../services/parametroService");
 
-exports.listarParametros = async (req, res) => {
+exports.listarParametros = async (req, res, next) => {
   try {
     const parametros = await parametroService.listar(req.auth.empresaId);
 
@@ -10,15 +10,11 @@ exports.listarParametros = async (req, res) => {
       .status(200)
       .json(parametros.map(parametroService.formatarParametro));
   } catch (error) {
-    console.error("Erro ao listar parâmetros:", error);
-
-    return res.status(500).json({
-      mensagem: "Erro interno ao listar parâmetros.",
-    });
+    return next(error);
   }
 };
 
-exports.buscarParametro = async (req, res) => {
+exports.buscarParametro = async (req, res, next) => {
   try {
     const parametro = await parametroService.buscarPorChave(
       req.auth.empresaId,
@@ -33,15 +29,11 @@ exports.buscarParametro = async (req, res) => {
 
     return res.status(200).json(parametroService.formatarParametro(parametro));
   } catch (error) {
-    console.error("Erro ao buscar parâmetro:", error);
-
-    return res.status(500).json({
-      mensagem: "Erro interno ao buscar parâmetro.",
-    });
+    return next(error);
   }
 };
 
-exports.atualizarParametro = async (req, res) => {
+exports.atualizarParametro = async (req, res, next) => {
   try {
     if (req.body.valor === undefined) {
       return res.status(400).json({
@@ -60,15 +52,11 @@ exports.atualizarParametro = async (req, res) => {
       parametro: parametroService.formatarParametro(parametro),
     });
   } catch (error) {
-    console.error("Erro ao atualizar parâmetro:", error);
-
-    return res.status(error.status || 400).json({
-      mensagem: error.message || "Não foi possível atualizar o parâmetro.",
-    });
+    return next(error);
   }
 };
 
-exports.atualizarParametros = async (req, res) => {
+exports.atualizarParametros = async (req, res, next) => {
   try {
     const parametros = await parametroService.atualizarVarios(
       req.auth.empresaId,
@@ -80,10 +68,6 @@ exports.atualizarParametros = async (req, res) => {
       parametros: parametros.map(parametroService.formatarParametro),
     });
   } catch (error) {
-    console.error("Erro ao atualizar parâmetros:", error);
-
-    return res.status(error.status || 400).json({
-      mensagem: error.message || "Não foi possível atualizar os parâmetros.",
-    });
+    return next(error);
   }
 };

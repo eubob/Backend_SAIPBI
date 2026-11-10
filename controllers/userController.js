@@ -6,7 +6,7 @@ const incluirRelacionamentos = [
   { model: Empresa, as: "empresa", attributes: ["id", "nome_fantasia"] },
 ];
 
-const listarUsuarios = async (req, res) => {
+const listarUsuarios = async (req, res, next) => {
   try {
     const usuarios = await Usuario.findAll({
       where: { empresa_id: req.auth.empresaId },
@@ -16,12 +16,11 @@ const listarUsuarios = async (req, res) => {
     });
     return res.status(200).json(usuarios);
   } catch (error) {
-    console.error("Erro ao buscar usuários:", error);
-    return res.status(500).json({ mensagem: "Erro ao buscar usuários." });
+    return next(error);
   }
 };
 
-const buscarUsuarioPorId = async (req, res) => {
+const buscarUsuarioPorId = async (req, res, next) => {
   try {
     const usuario = await Usuario.findOne({
       where: { id: req.params.id, empresa_id: req.auth.empresaId },
@@ -32,12 +31,11 @@ const buscarUsuarioPorId = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado." });
     return res.status(200).json(usuario);
   } catch (error) {
-    console.error("Erro ao buscar usuário:", error);
-    return res.status(500).json({ mensagem: "Erro ao buscar usuário." });
+    return next(error);
   }
 };
 
-const criarUsuario = async (req, res) => {
+const criarUsuario = async (req, res, next) => {
   try {
     const { nome, email, senha, perfil_id, ativo = true } = req.body;
     if (!nome || !email || !senha || !perfil_id) {
@@ -73,12 +71,11 @@ const criarUsuario = async (req, res) => {
     });
     return res.status(201).json(usuarioCriado);
   } catch (error) {
-    console.error("Erro ao criar usuário:", error);
-    return res.status(500).json({ mensagem: "Erro ao criar usuário." });
+    return next(error);
   }
 };
 
-const atualizarUsuario = async (req, res) => {
+const atualizarUsuario = async (req, res, next) => {
   try {
     const { nome, email, senha, perfil_id } = req.body;
     const usuario = await Usuario.findOne({
@@ -117,12 +114,11 @@ const atualizarUsuario = async (req, res) => {
     });
     return res.status(200).json(usuarioAtualizado);
   } catch (error) {
-    console.error("Erro ao atualizar usuário:", error);
-    return res.status(500).json({ mensagem: "Erro ao atualizar usuário." });
+    return next(error);
   }
 };
 
-const alterarStatusUsuario = async (req, res) => {
+const alterarStatusUsuario = async (req, res, next) => {
   try {
     const { ativo } = req.body;
     if (typeof ativo !== "boolean") {
@@ -151,10 +147,7 @@ const alterarStatusUsuario = async (req, res) => {
       usuario: { id: usuario.id, ativo: usuario.ativo },
     });
   } catch (error) {
-    console.error("Erro ao alterar status do usuário:", error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro ao alterar status do usuário." });
+    return next(error);
   }
 };
 
