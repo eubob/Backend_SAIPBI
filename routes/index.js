@@ -11,6 +11,7 @@ const clienteRoutes = require("./clientes");
 const fornecedorRoutes = require("./fornecedores");
 const produtoRoutes = require("./produtos");
 const parametroRoutes = require("./parametros");
+const relatorioIARoutes = require('./relatorioIA');
 
 const routes = Router();
 
@@ -24,5 +25,6 @@ routes.use("/clientes", clienteRoutes);
 routes.use("/fornecedores", fornecedorRoutes);
 routes.use("/produtos", produtoRoutes);
 routes.use("/parametros", parametroRoutes);
+routes.use('/ia', relatorioIARoutes)
 
 module.exports = routes;
