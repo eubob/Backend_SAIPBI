@@ -1,4 +1,5 @@
 // Schema observado em 2026-11-07; origem: information_schema do banco local.
+// Colunas anotadas com a migration 20261124120000 foram acrescentadas à mão e ainda não foram observadas no banco local.
 // Colunas geradas e CHECKs são preservados como notas; não executar como migration.
 
 Table categoria {
@@ -6,6 +7,9 @@ Table categoria {
   empresa_id "int(10) unsigned" [not null]
   nome "varchar(100)" [not null]
   ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
+  estoque_minimo_padrao "int(11)" [note: 'NULL herda da empresa; migration 20261124120000 (não observada no banco local)']
+  estoque_maximo_padrao "int(11)" [note: 'NULL = sem máximo; migration 20261124120000 (não observada no banco local)']
+  estoque_seguranca_padrao "int(11)" [note: 'NULL herda da empresa; migration 20261124120000 (não observada no banco local)']
   created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
   updated_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
   indexes {
@@ -200,7 +204,9 @@ Table produto {
   unidade "varchar(10)" [not null, note: 'DEFAULT \'un\'']
   preco_venda "decimal(12,2)" [not null]
   custo "decimal(12,2)" [not null]
-  estoque_minimo "int(11)" [not null, note: 'DEFAULT 0']
+  estoque_minimo "int(11)" [note: 'NULL herda da categoria/empresa; era NOT NULL DEFAULT 0 antes da migration 20261124120000 (não observada no banco local)']
+  estoque_maximo "int(11)" [note: 'NULL herda da categoria; migration 20261124120000 (não observada no banco local)']
+  estoque_seguranca "int(11)" [note: 'NULL herda da categoria/empresa; migration 20261124120000 (não observada no banco local)']
   estoque_atual "int(11)" [not null, note: 'DEFAULT 0']
   ativo "tinyint(1)" [not null, note: 'DEFAULT 1']
   created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']
@@ -220,6 +226,7 @@ Table produto_fornecedor {
   fornecedor_id "int(10) unsigned" [not null]
   prazo_padrao_dias "int(10) unsigned" [not null]
   lote_minimo "int(10) unsigned" [not null, note: 'DEFAULT 1']
+  multiplo_compra "int(10) unsigned" [not null, note: 'DEFAULT 1; CHECK > 0; migration 20261124120000 (não observada no banco local)']
   custo "decimal(12,2)" [not null]
   principal "tinyint(1)" [not null, note: 'DEFAULT 0']
   created_at "datetime" [not null, note: 'DEFAULT current_timestamp()']

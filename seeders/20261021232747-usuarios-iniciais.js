@@ -44,6 +44,7 @@ module.exports = {
     const rounds = Number(process.env.BCRYPT_ROUNDS) || 10;
     const senhaHash = await bcrypt.hash("1234", rounds);
 
+    // INSERT IGNORE pela chave única (e-mail): pode ser repetido sem duplicar.
     await queryInterface.bulkInsert("usuario", [
       {
         empresa_id: empresaId,
@@ -78,7 +79,7 @@ module.exports = {
         updated_at: new Date(),
         deleted_at: null,
       },
-    ]);
+    ], { ignoreDuplicates: true });
   },
 
   async down(queryInterface) {

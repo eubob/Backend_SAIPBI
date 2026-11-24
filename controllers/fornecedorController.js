@@ -1,6 +1,6 @@
 const { Fornecedor } = require("../models");
 
-exports.listarFornecedors = async (req, res, next) => {
+exports.listarFornecedores = async (req, res, next) => {
   try {
     const registros = await Fornecedor.findAll({
       where: { empresa_id: req.auth.empresaId },

@@ -8,9 +8,11 @@ module.exports = (error, req, res, next) => {
   let status = 500;
   let mensagem = "Erro interno do servidor.";
 
+  // Apenas AppError (mensagem escrita pelo próprio SAIPBI) é exposto ao cliente.
+  // 502/503/504 representam falhas de serviços externos (ex.: provedor de IA).
   if (
     error instanceof AppError &&
-    [400, 401, 403, 404, 409].includes(error.status)
+    [400, 401, 403, 404, 409, 502, 503, 504].includes(error.status)
   ) {
     status = error.status;
     mensagem = error.message;

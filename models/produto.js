@@ -71,10 +71,23 @@ module.exports = (sequelize) => {
         allowNull: false,
         validate: { min: 0.01 },
       },
+      // Regras de estoque: NULL herda da categoria/empresa; zero é explícito.
       estoque_minimo: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
+        allowNull: true,
+        defaultValue: null,
+        validate: { min: 0 },
+      },
+      estoque_maximo: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+        validate: { min: 0 },
+      },
+      estoque_seguranca: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
         validate: { min: 0 },
       },
       // Cache do saldo. Fonte de verdade = soma de movimentacao_estoque.

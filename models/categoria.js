@@ -24,6 +24,22 @@ module.exports = (sequelize) => {
       },
       empresa_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
       nome: { type: DataTypes.STRING(100), allowNull: false },
+      // Padrões herdados pelos produtos da categoria; NULL herda da empresa.
+      estoque_minimo_padrao: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: { min: 0 },
+      },
+      estoque_maximo_padrao: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: { min: 0 },
+      },
+      estoque_seguranca_padrao: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: { min: 0 },
+      },
       ativo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     },
     {

@@ -24,7 +24,6 @@ router.put(
 router.delete(
   "/:id",
   authorize("Administrador", "Gestor"),
-  validateRequest("cliente"),
   controller.deletarCliente,
 );
 module.exports = router;

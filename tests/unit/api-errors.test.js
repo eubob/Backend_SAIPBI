@@ -36,6 +36,10 @@ before(async () => {
 });
 beforeEach(() => {
   mock.restoreAll();
+  // Testes de contrato não abrem conexão: a transação recebe um objeto simulado.
+  mock.method(db.sequelize, "transaction", async (callback) =>
+    callback({ LOCK: { UPDATE: "UPDATE", SHARE: "SHARE" } }),
+  );
   mock.method(db.Usuario, "findOne", async ({ where }) => {
     // O lookup da autenticação não possui empresa_id; consultas de domínio possuem.
     if (where.empresa_id !== undefined) return null;

@@ -40,7 +40,10 @@ module.exports = {
       }
     }
 
-    await queryInterface.bulkInsert("parametro_sistema", registros);
+    // INSERT IGNORE: pode ser repetido sem duplicar nem sobrescrever valores já ajustados.
+    await queryInterface.bulkInsert("parametro_sistema", registros, {
+      ignoreDuplicates: true,
+    });
   },
 
   async down(queryInterface) {

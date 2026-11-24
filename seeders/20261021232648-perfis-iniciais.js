@@ -3,6 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
+    // INSERT IGNORE pela chave única (nome): pode ser repetido sem duplicar.
     await queryInterface.bulkInsert("perfil_acesso", [
       {
         nome: "Administrador",
@@ -25,7 +26,7 @@ module.exports = {
         updated_at: new Date(),
         deleted_at: null,
       },
-    ]);
+    ], { ignoreDuplicates: true });
   },
 
   async down(queryInterface) {

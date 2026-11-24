@@ -42,6 +42,13 @@ module.exports = (sequelize) => {
         defaultValue: 1,
         validate: { min: 1 },
       },
+      // Embalagem de compra: a quantidade proposta é arredondada para múltiplos.
+      multiplo_compra: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+        defaultValue: 1,
+        validate: { min: 1 },
+      },
       custo: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false,

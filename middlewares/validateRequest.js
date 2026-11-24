@@ -4,6 +4,9 @@ const AppError = require("../utils/AppError");
 
 const text = (max, nullable = false) => ({ type: "text", max, nullable });
 const integer = (min = 1, max = 4294967295) => ({ type: "integer", min, max });
+const INT_MAX = 2147483647;
+// Quantidade de regra de estoque: NULL herda do nível acima; zero é explícito.
+const regraEstoque = { ...integer(0, INT_MAX), nullable: true };
 const money = { type: "decimal", min: 0.01, max: 9999999999.99 };
 const boolean = { type: "boolean" };
 const email = { ...text(100), email: true };
@@ -31,7 +34,13 @@ const schemas = {
   },
   categoria: {
     required: ["nome"],
-    fields: { nome: text(100), ativo: boolean },
+    fields: {
+      nome: text(100),
+      ativo: boolean,
+      estoque_minimo_padrao: regraEstoque,
+      estoque_maximo_padrao: regraEstoque,
+      estoque_seguranca_padrao: regraEstoque,
+    },
   },
   cliente: {
     required: ["nome"],
@@ -60,7 +69,9 @@ const schemas = {
       unidade: text(10),
       preco_venda: money,
       custo: money,
-      estoque_minimo: integer(0, 2147483647),
+      estoque_minimo: regraEstoque,
+      estoque_maximo: regraEstoque,
+      estoque_seguranca: regraEstoque,
       ativo: boolean,
     },
   },
@@ -70,6 +81,7 @@ const schemas = {
       fornecedor_id: integer(),
       prazo_padrao_dias: integer(),
       lote_minimo: integer(),
+      multiplo_compra: integer(1, 1000000),
       custo: money,
       principal: boolean,
     },

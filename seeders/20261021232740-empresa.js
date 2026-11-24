@@ -3,6 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
+    // INSERT IGNORE pela chave única (documento): pode ser repetido sem duplicar.
     await queryInterface.bulkInsert("empresa", [
       {
         razao_social: "Coca-Cola Demo LTDA",
@@ -15,7 +16,7 @@ module.exports = {
         updated_at: new Date(),
         deleted_at: null,
       },
-    ]);
+    ], { ignoreDuplicates: true });
   },
 
   async down(queryInterface) {

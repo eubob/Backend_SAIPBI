@@ -21,7 +21,6 @@ router.put(
 router.delete(
   "/:id",
   authorize("Administrador", "Gestor"),
-  validateRequest("categoria"),
   controller.deletarCategoria,
 );
 module.exports = router;
